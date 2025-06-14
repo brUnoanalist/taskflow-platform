@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block head_title %}TaskFlow{% endblock %}</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de Alpine.js para interactividad -->
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <style>
+        .sidebar-scroll::-webkit-scrollbar { width: 5px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background-color: #f1f5f9; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div x-data="{ sidebarOpen: true }" class="flex h-screen bg-gray-200">
+        <!-- Sidebar -->
+        <aside 
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+            class="fixed inset-y-0 left-0 z-30 w-64 bg-gray-800 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
+            
+            <div class="flex items-center justify-center h-16 px-6 bg-gray-900">
+                <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                <span class="ml-3 text-lg font-bold">TaskFlow</span>
+            </div>
+
+            <nav class="flex-1 px-4 py-6 space-y-2 sidebar-scroll overflow-y-auto">
+                <a href="{% url 'home' %}" class="flex items-center px-4 py-2 text-gray-100 bg-gray-700 rounded-md">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span class="ml-3">Home</span>
+                </a>
+                <!-- Otros enlaces del sidebar aquí -->
+            </nav>
+        </aside>
+
+        <!-- Contenido Principal -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="flex items-center justify-between h-16 px-6 py-4 bg-white border-b">
+                <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 focus:outline-none lg:hidden">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+                <div class="relative w-full max-w-md lg:mx-auto">
+                    <!-- Contenido del Header, como la búsqueda -->
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                    <div x-data="{ dropdownOpen: false }" class="relative">
+                        <button @click="dropdownOpen = !dropdownOpen" class="relative flex items-center space-x-2 focus:outline-none">
+                            <span class="text-gray-700 font-medium hidden md:block">Hola, {{ user.name }}</span>
+                            <img class="object-cover w-8 h-8 rounded-full" src="https://placehold.co/100x100/E2E8F0/4A5568?text={{ user.username.0|upper }}" alt="Tu foto de perfil">
+                        </button>
+                        <div x-show="dropdownOpen" @click.away="dropdownOpen = false" class="absolute right-0 w-48 mt-2 py-2 bg-white rounded-md shadow-xl z-20">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Perfil</a>
+                            <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Cerrar Sesión</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </header>
+
+            <!-- Área de contenido específico de la página -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                {% block app_content %}
+                <!-- El contenido de otras plantillas (como home.html) se insertará aquí -->
+                {% endblock app_content %}
+            </main>
+        </div>
+    </div>
+</body>
+</html>
