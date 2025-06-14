@@ -1,1 +1,47 @@
+# Archivo de secretos y variables de entorno
+# NUNCA subas este archivo a tu repositorio.
+.env
+
+# Entorno virtual de Python
+# La carpeta venv contiene todas las librerías de Python instaladas,
+# no es necesario subirla ya que se reconstruye con 'pip install -r requirements.txt'.
 venv/
+/venv/
+
+# Archivos compilados y caché de Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Base de datos local
+# La base de datos de desarrollo no debe estar en el repositorio.
+# El servidor de producción tendrá su propia base de datos.
+db.sqlite3
+*.sqlite3
+
+# Dependencias de Node.js
+# La carpeta node_modules puede pesar cientos de megabytes.
+# Se reconstruye fácilmente con 'npm install'.
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Archivos de sistema operativo
+# Archivos de metadata que crean macOS y Windows.
+.DS_Store
+Thumbs.db
+
+# Archivos de IDE/Editor
+# Configuraciones específicas de tu editor de código.
+.idea/
+.vscode/
+*.swp
+
+# Archivos estáticos y de medios (Opcional pero muy recomendado)
+# Estas carpetas son generadas por Django en producción con 'collectstatic'
+# o contienen archivos subidos por los usuarios. No pertenecen al código fuente.
+/static/
+/staticfiles/
+/media/
+

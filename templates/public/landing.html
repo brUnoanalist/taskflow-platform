@@ -1,0 +1,23 @@
+<!-- templates/public/landing.html -->
+{% extends "account\base.html" %}
+
+{% block content %}
+<div class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="text-center max-w-2xl">
+        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
+            TaskFlow
+        </h1>
+        <p class="text-lg md:text-xl text-gray-300 mb-8">
+            La plataforma donde las tareas encuentran a su talento. Conecta, colabora y completa.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="{% url 'account_login' %}" class="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-8 rounded-full text-lg">
+                Iniciar Sesión
+            </a>
+            <a href="{% url 'account_signup' %}" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-8 rounded-full text-lg">
+                Registrarse
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

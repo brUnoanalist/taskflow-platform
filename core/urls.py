@@ -15,8 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
+from core.views import home_dispatch_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+     # La ruta principal ahora es manejada por nuestra lógica de despacho
+    path('', home_dispatch_view, name='home'),
+
+    
+    # Añade esta línea para todas las rutas de autenticación
+    # Esto creará URLs como /accounts/login/, /accounts/signup/, /accounts/google/login/
+    path('accounts/', include('allauth.urls')),
+    
+    # Aquí irán las URLs de tus otras apps (tasks, workflow, etc.)
 ]
