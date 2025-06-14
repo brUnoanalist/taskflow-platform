@@ -14,6 +14,7 @@ __pycache__/
 *.pyo
 *.pyd
 
+
 # Base de datos local
 # La base de datos de desarrollo no debe estar en el repositorio.
 # El servidor de producción tendrá su propia base de datos.
