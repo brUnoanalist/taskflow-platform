@@ -18,6 +18,7 @@ class Task(models.Model):
         IN_PROGRESS = 'IN_PROGRESS', 'En Progreso'
         COMPLETED = 'COMPLETED', 'Completado'
         PAID = 'PAID', 'Pagado'
+        CANCELLED = 'CANCELLED', 'Cancelado' 
 
     # --- Relaciones Clave ---
 
@@ -69,6 +70,12 @@ class Task(models.Model):
     updated_at = models.DateTimeField(
         verbose_name="Última actualización",
         auto_now=True
+    )
+    due_date = models.DateField(
+        verbose_name="Fecha Límite",
+        null=True,
+        blank=True,
+        help_text="Fecha opcional en la que la tarea debería estar completada."
     )
 
     class Meta:
