@@ -22,9 +22,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
      # La ruta principal ahora es manejada por nuestra lógica de despacho
     path('', home_dispatch_view, name='home'),
-    path('tasks/', include('tasks.urls', namespace='tasks')),
+    
     # Esto creará URLs como /accounts/login/, /accounts/signup/, /accounts/google/login/
     path('accounts/', include('allauth.urls')),
     
     # Aquí irán las URLs de tus otras apps (tasks, workflow, etc.)
+    path('tasks/', include('tasks.urls', namespace='tasks')),
 ]

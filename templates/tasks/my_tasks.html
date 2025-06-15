@@ -1,0 +1,93 @@
+{% extends "app_base.html" %}
+
+{% block head_title %}Mis Tareas{% endblock %}
+
+{% block app_content %}
+<div class="container mx-auto px-4 py-8">
+
+    <h1 class="text-3xl font-extrabold text-gray-900 mb-8">
+        Mis Tareas <span class="text-indigo-600">({{ request.user.username|capfirst }})</span>
+    </h1>
+
+    {# --- Section: Tareas En Progreso (Asignadas a Ti) --- #}
+    {% if tasks_assigned_to_me %}
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">Tareas En Progreso (Asignadas a Ti)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for task in tasks_assigned_to_me %}
+                {# Re-use the _task_card.html partial for consistent display #}
+                {% include "tasks/_task_card.html" with task=task %}
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+        {# Empty state for tasks assigned to the current user that are in progress #}
+        <div class="mb-12 col-span-full text-center py-8 px-6 bg-white rounded-lg shadow-md">
+            <p class="text-gray-500 text-lg">¡Excelente! No tienes tareas asignadas en progreso. ¿Listo para aceptar una nueva?</p>
+            <div class="mt-6">
+                <a href="{% url 'home' %}" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 shadow-lg transition-colors duration-300">
+                    Ver Tareas Disponibles
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    {# --- Section: Tareas Que Has Publicado --- #}
+    {% if tasks_posted_by_me %}
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">Tareas Que Has Publicado</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for task in tasks_posted_by_me %}
+                {# Re-use the _task_card.html partial #}
+                {% include "tasks/_task_card.html" with task=task %}
+            {% endfor %}
+        </div>
+        <div class="mt-8 text-center">
+            <a href="{% url 'tasks:create' %}" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 shadow-lg transition-colors duration-300 text-lg">
+                Publicar Nueva Tarea
+            </a>
+        </div>
+    </div>
+    {% else %}
+        {# Empty state for tasks posted by the current user #}
+        <div class="mb-12 col-span-full text-center py-16 px-6 bg-white rounded-lg shadow-md">
+            <h3 class="mt-2 text-xl font-medium text-gray-900">¿Tienes algo que necesites hacer?</h3>
+            <p class="mt-1 text-sm text-gray-500">Publica tu primera tarea y encuentra al talento adecuado.</p>
+            <div class="mt-6">
+                <a href="{% url 'tasks:create' %}" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 shadow-lg transition-colors duration-300">
+                    Publicar Mi Primera Tarea
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    {# --- Optional Section: Tareas Completadas Por Ti (History of work you've done) --- #}
+    {# Only display if there are tasks in this queryset #}
+    {% if tasks_completed_by_me %}
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">Historial: Tareas Completadas Por Ti</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for task in tasks_completed_by_me %}
+                {# Re-use the _task_card.html partial #}
+                {% include "tasks/_task_card.html" with task=task %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {# --- Optional Section: Tareas Que Has Pagado (History of tasks you've paid for) --- #}
+    {# Only display if there are tasks in this queryset #}
+    {% if tasks_posted_and_paid %}
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">Historial: Tareas Que Has Pagado</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for task in tasks_posted_and_paid %}
+                {# Re-use the _task_card.html partial #}
+                {% include "tasks/_task_card.html" with task=task %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock app_content %}
