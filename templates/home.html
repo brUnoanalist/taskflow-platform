@@ -7,7 +7,7 @@
     <!-- Encabezado de la sección con botón de acción -->
     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
         <h2 class="text-2xl font-semibold text-gray-800">Tareas Disponibles</h2>
-        <a href="#" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 shadow-lg transition-colors duration-300">
+        <a href="{% url 'tasks:create' %}" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 shadow-lg transition-colors duration-300">
             Publicar Nueva Tarea
         </a>
     </div>
