@@ -136,7 +136,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# core/settings.py (al final del archivo)
 
 
 # Configuración de Backends de Autenticación (Esto se queda igual)
@@ -151,6 +150,9 @@ SITE_ID = 1
 
 # --- INICIA LA CONFIGURACIÓN MODERNA DE DJANGO-ALLAUTH ---
 
+# Le dice a allauth que use nuestras reglas personalizadas para crear usuarios.
+ACCOUNT_ADAPTER = 'users.adapter.CustomAccountAdapter'
+
 # Le decimos a allauth que nuestro CustomUser no tiene campo 'username'.
 # Esta es la línea clave que elimina las advertencias.
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -163,7 +165,7 @@ ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # --- EXPERIENCIA DE USUARIO ---
 LOGIN_REDIRECT_URL = '/'
