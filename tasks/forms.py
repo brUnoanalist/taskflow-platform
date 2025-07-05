@@ -18,3 +18,16 @@ class TaskForm(forms.ModelForm):
             'reward': 'Recompensa ($)',
             'due_date': 'Fecha Límite (Opcional)',
         }
+        
+class OwnerFeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['owner_comment', 'owner_rating']
+        widgets = {
+            'owner_comment': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Deja un comentario sobre el trabajo...'}),
+            'owner_rating': forms.NumberInput(attrs={'min': 1, 'max': 5, 'step': 0.1}),
+        }
+        labels = {
+            'owner_comment': 'Comentario',
+            'owner_rating': 'Calificación (1.0 - 5.0)',
+        }        

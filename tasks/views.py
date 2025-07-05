@@ -7,10 +7,13 @@ from django.db import transaction
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
+from django.contrib.auth import get_user_model
+from django.views import View
+from .models import Task ,Application
+from .forms import TaskForm,OwnerFeedbackForm
+from django.db.models import Avg
 
-from .models import Task 
-from .forms import TaskForm
-
+User = get_user_model()
 
 class TaskListHomeView(LoginRequiredMixin, ListView):
     model = Task
@@ -126,23 +129,30 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add the status choices to the context for easy access in the template
+        task = self.get_object()
+
+        context['applicant_ids'] = list(task.applications.values_list('applicant__id', flat=True))
+
         context['STATUS_POSTED'] = Task.Status.POSTED
         context['STATUS_IN_PROGRESS'] = Task.Status.IN_PROGRESS
         context['STATUS_COMPLETED'] = Task.Status.COMPLETED
         context['STATUS_PAID'] = Task.Status.PAID
         context['STATUS_CANCELLED'] = Task.Status.CANCELLED
 
-        # These lists are useful for checking multiple statuses in templates
         context['TERMINAL_STATUSES'] = [
             Task.Status.COMPLETED,
             Task.Status.PAID,
-            Task.Status.CANCELLED
+            Task.Status.CANCELLED,
         ]
-        context['CANCELLABLE_STATUSES'] = [ # This might be useful elsewhere too
-            Task.Status.POSTED,
-            Task.Status.IN_PROGRESS
-        ]
+
+        # Nueva lógica: permitir calificación del trabajador
+        context['can_leave_review'] = (
+            task.status in [Task.Status.COMPLETED, Task.Status.PAID] and
+            self.request.user == task.posted_by and
+            task.assigned_to is not None and
+            task.owner_rating is None
+        )
+
         return context
 
 
@@ -175,7 +185,38 @@ class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     #     messages.error(self.request, 'Hubo un error al actualizar la tarea. Por favor, revisa los datos.')
     #     return super().form_invalid(form)
 
+class ApplyToTaskView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        task = get_object_or_404(Task, pk=pk)
 
+        if task.status != Task.Status.POSTED or task.posted_by == request.user:
+            messages.error(request, "No puedes postularte a esta tarea.")
+            return redirect('tasks:task_detail', pk=pk)
+
+        if Application.objects.filter(task=task, applicant=request.user).exists():
+            messages.warning(request, "Ya te has postulado a esta tarea.")
+            return redirect('tasks:task_detail', pk=pk)
+
+        Application.objects.create(task=task, applicant=request.user)
+        messages.success(request, "¡Postulación enviada!")
+        return redirect('tasks:task_detail', pk=pk)
+
+class AssignApplicantView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    def test_func(self):
+        task = get_object_or_404(Task, pk=self.kwargs['task_pk'])
+        return self.request.user == task.posted_by and task.status == Task.Status.POSTED
+
+    def post(self, request, task_pk, applicant_id):
+        task = get_object_or_404(Task, pk=task_pk)
+        applicant = get_object_or_404(User, pk=applicant_id)
+
+        task.assigned_to = applicant
+        task.status = Task.Status.IN_PROGRESS
+        task.save()
+
+        messages.success(request, f'Has asignado la tarea a {applicant.email}.')
+        return redirect('tasks:task_detail', pk=task_pk)
+    
 class AcceptTaskView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Task
     template_name = 'tasks/task_detail.html'
@@ -367,3 +408,51 @@ class CancelTaskView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def get(self, request, *args, **kwargs):
         messages.error(request, 'Acceso inválido. Por favor, usa el botón "Cancelar Tarea" para esta acción.')
         return redirect('tasks:task_detail', pk=self.kwargs['pk'])
+    
+    
+class CancelApplicationView(LoginRequiredMixin, View):
+    def post(self, request, task_id):
+        task = get_object_or_404(Task, pk=task_id)
+        application = Application.objects.filter(task=task, applicant=request.user).first()
+
+        if application and task.assigned_to is None:
+            application.delete()
+            messages.success(request, "Has cancelado tu postulación.")
+        else:
+            messages.error(request, "No puedes cancelar esta postulación.")
+
+        return redirect('tasks:task_detail', pk=task_id)    
+    
+class OwnerFeedbackUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Task
+    form_class = OwnerFeedbackForm
+    template_name = 'tasks/owner_feedback_form.html'
+
+    def test_func(self):
+        task = self.get_object()
+        # Solo el dueño puede dejar feedback, y solo si la tarea está COMPLETADA o PAID
+        return (self.request.user == task.posted_by and
+                task.status in [Task.Status.COMPLETED, Task.Status.PAID])
+
+    def get_success_url(self):
+        return reverse_lazy('tasks:task_detail', kwargs={'pk': self.object.pk})
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Actualizar reputación del usuario asignado
+        self.update_user_reputation()
+        messages.success(self.request, "Tu comentario y calificación se guardaron correctamente.")
+        return response
+
+    def update_user_reputation(self):
+        assigned_user = self.object.assigned_to
+        if assigned_user:
+            avg_rating = Task.objects.filter(
+                assigned_to=assigned_user,
+                owner_rating__isnull=False,
+                status=Task.Status.PAID
+            ).aggregate(avg_rating=Avg('owner_rating'))['avg_rating']
+
+            if avg_rating:
+                assigned_user.reputation = avg_rating
+                assigned_user.save()    

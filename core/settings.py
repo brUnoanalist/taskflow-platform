@@ -159,12 +159,16 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
 
 # El método de login será exclusivamente a través de email.
-ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email"]
+
 
 # El email es obligatorio y debe ser verificado.
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_SIGNUP_FIELDS = ['email']
 
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # --- EXPERIENCIA DE USUARIO ---
