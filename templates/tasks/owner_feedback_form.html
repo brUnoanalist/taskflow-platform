@@ -1,0 +1,20 @@
+{% extends "app_base.html" %}
+
+{% block head_title %}Dejar Comentario y Calificación - {{ task.title }}{% endblock %}
+
+{% block app_content %}
+<div class="container mx-auto p-4 max-w-lg">
+    <h1 class="text-2xl font-semibold mb-4">Dejar Comentario y Calificación para "{{ task.title }}"</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+            Guardar
+        </button>
+    </form>
+
+    <a href="{% url 'tasks:task_detail' task.pk %}" class="inline-block mt-4 text-blue-600 hover:underline">Volver a la tarea</a>
+</div>
+{% endblock %}

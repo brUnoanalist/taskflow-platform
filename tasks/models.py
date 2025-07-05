@@ -1,7 +1,9 @@
 # tasks/models.py
 
 from django.db import models
-from django.conf import settings # Práctica senior para referenciar al modelo de usuario
+from django.conf import settings 
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 
 class Task(models.Model):
     """
@@ -77,6 +79,20 @@ class Task(models.Model):
         blank=True,
         help_text="Fecha opcional en la que la tarea debería estar completada."
     )
+    
+    owner_comment = models.TextField(
+        verbose_name="Comentario del propietario",
+        blank=True,
+        null=True,
+    )
+    owner_rating = models.DecimalField(
+        verbose_name="Calificación del propietario",
+        max_digits=2,
+        decimal_places=1,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
+    )
 
     class Meta:
         ordering = ['-created_at'] # Por defecto, las tareas más nuevas aparecen primero.
@@ -85,3 +101,39 @@ class Task(models.Model):
 
     def __str__(self):
         return f"'{self.title}' por @{self.posted_by.username}"
+    
+    
+class Application(models.Model):
+    """
+    Representa una postulación de un usuario a una tarea específica.
+    El ciclo lo inicia un usuario y lo cierra el creador de la tarea al asignarlo.
+    """
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name='applications',
+        verbose_name='Tarea'
+    )
+    applicant = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='applications',
+        verbose_name='Postulante'
+    )
+    message = models.TextField(
+        verbose_name='Mensaje del postulante',
+        blank=True
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha de postulación'
+    )
+
+    class Meta:
+        unique_together = ('task', 'applicant')
+        verbose_name = 'Postulación'
+        verbose_name_plural = 'Postulaciones'
+
+    def __str__(self):
+        return f"{self.applicant.email} → {self.task.title}"
+    
